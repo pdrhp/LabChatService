@@ -23,7 +23,7 @@ public class TokenService : ITokenService
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey =
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Key:SymmetricSecurityKey"])),
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
             ValidateAudience = false,
             ValidateIssuer = false,
             ClockSkew = TimeSpan.Zero,
@@ -45,7 +45,7 @@ public class TokenService : ITokenService
             identity.AddClaim(new Claim(ClaimTypes.Role, role));
         }
         
-        var chave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Key:SymmetricSecurityKey"]));
+        var chave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         
         var signInCrendentials = new SigningCredentials(chave, SecurityAlgorithms.HmacSha256);
 

@@ -105,7 +105,6 @@ public class UserService: IUserService
     public async Task<IResponse> CreateRoles()
     {
         string[] roles = new string[] { "User", "Admin" };
-        string[] rolesCriadas = new string[] { };
 
         foreach (var role in roles)
         {
@@ -114,11 +113,10 @@ public class UserService: IUserService
             if(!roleExists)
             {
                 await _roleManager.CreateAsync(new IdentityRole() { Name = role});
-                rolesCriadas.Append(role);
             }
         }
         
-        return new SuccessResponse<string[]>(true, 201, "Roles criadas com sucesso!", rolesCriadas);
+        return new SuccessResponse<string[]>(true, 201, "Roles criadas com sucesso!", roles);
     }
 
     public async Task<IResponse> VerifySession(HttpContext context)
