@@ -55,7 +55,7 @@ public class UserService: IUserService
 
     public async Task<IResponse> LogInUser(LoginUserDto userDto, HttpContext context)
     {
-        var appUser = await _userManager.FindByNameAsync(userDto.Username);
+        var appUser = await _userManager.FindByEmailAsync(userDto.Email);
         
         if (appUser is null)
             return new ErrorResponse(false, 400, "Usuário não encontrado");
