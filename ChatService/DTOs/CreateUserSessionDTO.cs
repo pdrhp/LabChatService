@@ -1,3 +1,3 @@
 ﻿namespace ChatService.DTOs;
 
-public record CreateUserSessionDTO(string? Id, string? username, string? nome, List<string>? Role);
+public record CreateUserSessionDTO(string? Id, string? username, string? timeStamp, List<string>? Role);
