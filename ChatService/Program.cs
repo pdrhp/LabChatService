@@ -21,12 +21,14 @@ builder.Services.AddScoped<IMapperService, MapperService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddSignalR();
+
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("chat", policyBuilder =>
     {
-        policyBuilder.WithOrigins("http://localhost:4200");
+        policyBuilder.WithOrigins("http://localhost:5173");
         policyBuilder.AllowAnyHeader();
         policyBuilder.AllowAnyMethod();
         policyBuilder.AllowCredentials();
