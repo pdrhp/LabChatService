@@ -25,7 +25,10 @@ builder.Services.AddScoped<IMapperService, MapperService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR().AddHubOptions<ChatHub>(o =>
+{
+    o.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+});
 builder.Services.Replace(ServiceDescriptor.Singleton(typeof(IUserIdProvider), typeof(UserIdProvider)));
 
 builder.Services.AddCors(options =>
@@ -112,5 +115,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/chat");
 
 app.Run();
