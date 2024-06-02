@@ -1,12 +1,16 @@
 using System.Text;
 using ChatService.Data;
+using ChatService.Hubs;
 using ChatService.Interfaces;
 using ChatService.Mapper;
 using ChatService.Models;
+using ChatService.Providers;
 using ChatService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +26,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddSignalR();
-
+builder.Services.Replace(ServiceDescriptor.Singleton(typeof(IUserIdProvider), typeof(UserIdProvider)));
 
 builder.Services.AddCors(options =>
 {
