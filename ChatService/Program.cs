@@ -24,6 +24,7 @@ builder.Services.AddDbContext<ChatServiceDbContext>(opts =>
 builder.Services.AddScoped<IMapperService, MapperService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IChatService, ChatService.Services.ChatService>();
 
 builder.Services.AddSignalR().AddHubOptions<ChatHub>(o =>
 {
@@ -116,6 +117,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<ChatHub>("/chat");
+app.MapHub<ChatHub>("/connectchat");
 
 app.Run();
