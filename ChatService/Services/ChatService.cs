@@ -16,13 +16,15 @@ public class ChatService : IChatService
     private readonly IHubContext<ChatHub> _chatHubContext;
     private readonly ChatServiceDbContext _context;
     private readonly UserManager<User> _userManager;
+    private readonly IMapperService _mapperService;
     
 
-    public ChatService(IHubContext<ChatHub> chatHubContext, ChatServiceDbContext context, UserManager<User> userManager, ILogger<ChatService> logger)
+    public ChatService(IHubContext<ChatHub> chatHubContext, ChatServiceDbContext context, UserManager<User> userManager, IMapperService mapperService)
     {
         _chatHubContext = chatHubContext;
         _context = context;
         _userManager = userManager;
+        _mapperService = mapperService;
     }
 
     
@@ -54,10 +56,12 @@ public class ChatService : IChatService
 
         var requestFromDb = _context.ChatRequests.Include(cr => cr.Requester)
             .FirstOrDefault(cr => cr.RequestedId == user.Id && cr.RequesterId == RequesterId && cr.Accepted == false && cr.Rejected == false);
+
+        ReadRequestDTO safeRequest = _mapperService.MapRequestToReadRequestDTO(requestFromDb);
         
-        await _chatHubContext.Clients.User(user.Id).SendAsync("ReceiveRequest", requestFromDb);
+        await _chatHubContext.Clients.User(user.Id).SendAsync("ReceiveRequest", safeRequest);
         
-        return new SuccessResponse<ChatRequest>(true, 200, "Requisição enviada com sucesso", requestFromDb);
+        return new SuccessResponse<ReadRequestDTO>(true, 200, "Requisição enviada com sucesso", safeRequest);
     }
 
 
