@@ -23,20 +23,14 @@ public class ChatHub: Hub
     public override async Task OnConnectedAsync()
     {
         var userId = Context.UserIdentifier;
-        //
-        // var teste2 = ConnectedUsers.TryGetValue(userId, out var connectionId);
-        // var teste = ConnectedUsers.ContainsKey(userId);
-        //
-        // if (teste)
-        // {
-        //     _logger.LogInformation("User already connected: {0}", userId);
-        //     Context.Abort();
-        //     return;
-        // }
-        
+     
+           
         _logger.LogInformation("Client connected, ConnectionID: {0}", Context.ConnectionId);
         _logger.LogInformation("Client ID: {0}", Context.UserIdentifier);
         ConnectedUsers.TryAdd(userId, Context.ConnectionId);
+
+
+        await Clients.Caller.SendAsync("ReceiveMessageFromServer", "Admin: " ,$"Connection established successfully! {userId}");
         
         await base.OnConnectedAsync();
     }
