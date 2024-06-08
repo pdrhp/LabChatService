@@ -2,6 +2,7 @@
 
 public record ReadRequestDTO
 {
+    public int Id { get; init; }
     public bool Accepted { get; init; }
     public bool Rejected { get; init; }
     public string RequesterId { get; init; }

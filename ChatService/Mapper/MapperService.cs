@@ -21,6 +21,7 @@ public class MapperService : IMapperService
     {
         return new ReadRequestDTO
         {
+            Id = request.Id,
             Accepted = request.Accepted,
             Rejected = request.Rejected,
             RequestedId = request.RequestedId,

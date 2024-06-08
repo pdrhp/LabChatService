@@ -65,10 +65,10 @@ public class ChatService : IChatService
     }
 
 
-    public async Task<IResponse> ManageRequest(string RequestId, string RequesterId, bool RequestClientResponse)
+    public async Task<IResponse> ManageRequest(int RequestId, bool RequestClientResponse)
     {
         var request = _context.ChatRequests.Include(cr => cr.Requester)
-            .FirstOrDefault(cr => cr.RequestedId == RequesterId && cr.Accepted == false && cr.Rejected == false);
+            .FirstOrDefault(cr => cr.Id == RequestId && cr.Accepted == false && cr.Rejected == false);
         
         if(request == null){
             return new ErrorResponse(false, 404, "Solicitação não encontrada");

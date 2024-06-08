@@ -6,5 +6,5 @@ public interface IChatService
 {
     Task<IResponse> SendRequest(SendRequestDTO dto, string RequesterId);
     
-    Task<IResponse> ManageRequest(string RequestId, string RequesterId, bool RequestClientResponse);
+    Task<IResponse> ManageRequest(int RequestId,  bool RequestClientResponse);
 }

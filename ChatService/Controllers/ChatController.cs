@@ -30,12 +30,11 @@ public class ChatController: ControllerBase
         return StatusCode(response.StatusCode, response);
     }
     
-    [HttpPost("manageRequest")]
-    public async Task<IActionResult> ManageRequest([FromBody] ManageRequestDTO dto)
+    [HttpPost("manageRequest/{requestId}")]
+    public async Task<IActionResult> ManageRequest(int requestId, [FromBody] ManageRequestDTO dto)
     {
-        var id = HttpContext.User.FindFirst(c => c.Type == "id").Value;
-        var response = await _chatService.ManageRequest(id, dto.RequesterId, dto.RequestClientResponse);
-
+        
+        var response = await _chatService.ManageRequest(requestId,  dto.RequestClientResponse);
         return StatusCode(response.StatusCode, response);
     }
 }
