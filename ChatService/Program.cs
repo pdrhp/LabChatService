@@ -26,6 +26,7 @@ builder.Services.AddScoped<IMapperService, MapperService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IChatService, ChatService.Services.ChatService>();
+builder.Services.AddSingleton<ISharedMemoryConnectionDB, SharedMemoryConnectionsDB>();
 
 builder.Services.AddSignalR().AddHubOptions<ChatHub>(o =>
 {
