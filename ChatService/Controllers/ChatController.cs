@@ -33,7 +33,6 @@ public class ChatController: ControllerBase
     [HttpPost("manageRequest/{requestId}")]
     public async Task<IActionResult> ManageRequest(int requestId, [FromBody] ManageRequestDTO dto)
     {
-        
         var response = await _chatService.ManageRequest(requestId,  dto.RequestClientResponse);
         return StatusCode(response.StatusCode, response);
     }
