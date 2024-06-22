@@ -1,4 +1,5 @@
-﻿using ChatService.Data;
+﻿using System.Collections;
+using ChatService.Data;
 using ChatService.DTOs.ChatDTOs;
 using ChatService.Hubs;
 using ChatService.Interfaces;
@@ -90,5 +91,18 @@ public class ChatService : IChatService
         await _context.SaveChangesAsync();
         
         return new SuccessResponse<ChatRequest>(true, 200, "Solicitação gerenciada com sucesso.", request);
+    }
+    
+    public async Task<IResponse> GetActiveRequests(string UserId)
+    {
+        var requests = await _context.ChatRequests
+            .Include(cr => cr.Requested)
+            .Include(cr => cr.Requester)
+            .Where(cr => cr.RequestedId == UserId | cr.RequesterId == UserId && cr.Rejected == false)
+            .ToListAsync();
+        
+        List<ReadRequestDTO> safeRequests = new List<ReadRequestDTO>();
+        safeRequests = requests.Select(request => _mapperService.MapRequestToReadRequestDTO(request)).ToList();
+        return new SuccessResponse<List<ReadRequestDTO>>(true, 200, "Solicitações ativas encontradas", safeRequests);
     }
 }
