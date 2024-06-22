@@ -52,6 +52,7 @@ public class UserService: IUserService
 
         return new SuccessResponse<User>(true, 201, "Usuário cadastrado com sucesso!", newUser);
     }
+    
 
     public async Task<IResponse> LogInUser(LoginUserDto userDto, HttpContext context)
     {
@@ -66,8 +67,8 @@ public class UserService: IUserService
             return new ErrorResponse(false, 400, "Senha incorreta");
 
         var userRoles = await _userManager.GetRolesAsync(appUser);
-
-        CreateUserSessionDTO userSession = new CreateUserSessionDTO(appUser.Id, appUser.UserName, appUser.Nome, userRoles.ToList());
+        
+        CreateUserSessionDTO userSession = new CreateUserSessionDTO(appUser.Id, appUser.UserName, appUser.Nome, appUser.Email, userRoles.ToList());
 
         ReadUserSessionDTO loggedUser = _tokenService.GenerateToken(userSession);
         
