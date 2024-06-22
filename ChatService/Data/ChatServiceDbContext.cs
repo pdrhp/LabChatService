@@ -10,7 +10,6 @@ public class ChatServiceDbContext : IdentityDbContext<User>
     public ChatServiceDbContext(DbContextOptions<ChatServiceDbContext> options) : base(options) {}
     
     public DbSet<ChatMessage> ChatMessages { get; set; }
-    public DbSet<ChatGroup> ChatGroups { get; set; }
     public DbSet<ChatRequest> ChatRequests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
