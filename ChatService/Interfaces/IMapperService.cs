@@ -7,5 +7,5 @@ namespace ChatService.Interfaces;
 public interface IMapperService
 {
     User MapUserDtoToUser(CreateUserDTO userDto);
-    ReadRequestDTO MapRequestToReadRequestDTO(ChatRequest request);
+    ReadChatItemDto MapRequestToReadRequestDTO(ChatRequest request);
 }

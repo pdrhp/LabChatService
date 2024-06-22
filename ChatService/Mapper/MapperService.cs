@@ -17,9 +17,9 @@ public class MapperService : IMapperService
         };
     }
 
-    public ReadRequestDTO MapRequestToReadRequestDTO(ChatRequest request)
+    public ReadChatItemDto MapRequestToReadRequestDTO(ChatRequest request)
     {
-        return new ReadRequestDTO
+        return new ReadChatItemDto
         {
             Id = request.Id,
             Accepted = request.Accepted,
@@ -40,7 +40,15 @@ public class MapperService : IMapperService
                 Nome = request.Requester.Nome,
                 UserName = request.Requester.UserName
             },
-            Timestamp = request.Timestamp
+            Timestamp = request.Timestamp,
+            Messages = request.Messages?.Select(m => new ReadMessageDto
+            {
+                Id = m.Id,
+                Message = m.Message,
+                SenderId = m.SenderId,
+                ReceiverId = m.ReceiverId,
+                Timestamp = m.Timestamp
+            }).ToList()
         };
     }
 }

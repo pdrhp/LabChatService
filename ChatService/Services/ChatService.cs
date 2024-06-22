@@ -27,8 +27,7 @@ public class ChatService : IChatService
         _userManager = userManager;
         _mapperService = mapperService;
     }
-
-
+    
     public async Task<IResponse> SendRequest(SendRequestDTO dto, string RequesterId)
     {
         var user = await _userManager.FindByEmailAsync(dto.Email);
@@ -63,11 +62,11 @@ public class ChatService : IChatService
                 cr.RequestedId == user.Id && cr.RequesterId == RequesterId && cr.Accepted == false &&
                 cr.Rejected == false);
 
-        ReadRequestDTO safeRequest = _mapperService.MapRequestToReadRequestDTO(requestFromDb);
+        ReadChatItemDto safeChatItem = _mapperService.MapRequestToReadRequestDTO(requestFromDb);
 
-        await _chatHubContext.Clients.User(user.Id).SendAsync("ReceiveRequest", safeRequest);
+        await _chatHubContext.Clients.User(user.Id).SendAsync("ReceiveRequest", safeChatItem);
 
-        return new SuccessResponse<ReadRequestDTO>(true, 200, "Requisição enviada com sucesso", safeRequest);
+        return new SuccessResponse<ReadChatItemDto>(true, 200, "Requisição enviada com sucesso", safeChatItem);
     }
 
 
@@ -85,14 +84,21 @@ public class ChatService : IChatService
 
         request.Accepted = RequestClientResponse;
         request.Rejected = !RequestClientResponse;
+        request.Timestamp = DateTime.Now;
         
-        ReadRequestDTO safeRequest = _mapperService.MapRequestToReadRequestDTO(request);
+        
+        
+        ReadChatItemDto safeChatItem = _mapperService.MapRequestToReadRequestDTO(request);
         await _context.SaveChangesAsync();
         
-        await _chatHubContext.Clients.Users(safeRequest.RequesterId, safeRequest.RequestedId)
-            .SendAsync("ReceiveRequestResponse", safeRequest, RequestClientResponse);
+        await _chatHubContext.Clients.Users(safeChatItem.RequesterId, safeChatItem.RequestedId)
+            .SendAsync("ReceiveRequestResponse", safeChatItem, RequestClientResponse);
         
-        request.Timestamp = DateTime.Now;
+        
+        
+       
+        
+        
 
 
         return new SuccessResponse<ChatRequest>(true, 200, "Solicitação gerenciada com sucesso.", request);
@@ -103,11 +109,12 @@ public class ChatService : IChatService
         var requests = await _context.ChatRequests
             .Include(cr => cr.Requested)
             .Include(cr => cr.Requester)
+            .Include(cr => cr.Messages)
             .Where(cr => cr.RequestedId == UserId | cr.RequesterId == UserId && cr.Rejected == false)
             .ToListAsync();
 
-        List<ReadRequestDTO> safeRequests = new List<ReadRequestDTO>();
+        List<ReadChatItemDto> safeRequests = new List<ReadChatItemDto>();
         safeRequests = requests.Select(request => _mapperService.MapRequestToReadRequestDTO(request)).ToList();
-        return new SuccessResponse<List<ReadRequestDTO>>(true, 200, "Solicitações ativas encontradas", safeRequests);
+        return new SuccessResponse<List<ReadChatItemDto>>(true, 200, "Solicitações ativas encontradas", safeRequests);
     }
 }

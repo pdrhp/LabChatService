@@ -1,6 +1,8 @@
-﻿namespace ChatService.DTOs.ChatDTOs;
+﻿using System.Collections;
 
-public record ReadRequestDTO
+namespace ChatService.DTOs.ChatDTOs;
+
+public record ReadChatItemDto
 {
     public int Id { get; init; }
     public bool Accepted { get; init; }
@@ -10,4 +12,5 @@ public record ReadRequestDTO
     public string RequestedId { get; init; }
     public ReadUserDTO Requested { get; init; }
     public DateTime Timestamp { get; init; }
+    public ICollection<ReadMessageDto>? Messages { get; init; }
 }
