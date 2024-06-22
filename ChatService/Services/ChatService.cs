@@ -68,7 +68,9 @@ public class ChatService : IChatService
 
     public async Task<IResponse> ManageRequest(int RequestId, bool RequestClientResponse)
     {
-        var request = _context.ChatRequests.Include(cr => cr.Requester)
+        var request = _context.ChatRequests
+            .Include(cr => cr.Requester)
+            .Include(cr => cr.Requested)
             .FirstOrDefault(cr => cr.Id == RequestId && cr.Accepted == false && cr.Rejected == false);
         
         if(request == null){
