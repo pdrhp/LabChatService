@@ -16,22 +16,25 @@ public class ChatHub: Hub
     private readonly IChatService _chatService;
     private UserManager<User> _userManager;
     private readonly ILogger<ChatHub> _logger;
-    private static readonly ConcurrentDictionary<string, string> ConnectedUsers = new();
-    public ChatHub(ChatServiceDbContext context, UserManager<User> userManager, ILogger<ChatHub> logger, IChatService chatService)
+    private readonly ISharedMemoryConnectionDB _sharedMemoryConnectionDB;
+    public ChatHub(ChatServiceDbContext context, UserManager<User> userManager, ILogger<ChatHub> logger, IChatService chatService, ISharedMemoryConnectionDB sharedMemoryConnectionDB)
     {
         _chatService = chatService;
         _userManager = userManager;
         _logger = logger;
+        _sharedMemoryConnectionDB = sharedMemoryConnectionDB;
     }
+    
     
     public override async Task OnConnectedAsync()
     {
         var userId = Context.UserIdentifier;
+        var connectionId = Context.ConnectionId;
      
            
-        _logger.LogInformation("Client connected, ConnectionID: {0}", Context.ConnectionId);
-        _logger.LogInformation("Client ID: {0}", Context.UserIdentifier);
-        ConnectedUsers.TryAdd(userId, Context.ConnectionId);
+        _logger.LogInformation("Client connected, ConnectionID: {0}", userId);
+        _logger.LogInformation("Client ID: {0}", connectionId);
+        _sharedMemoryConnectionDB.Connections[userId] = connectionId;
 
 
         await Clients.Caller.SendAsync("ReceiveMessageFromServer", "Admin: " ,$"Connection established successfully! {userId}");
@@ -43,11 +46,10 @@ public class ChatHub: Hub
     
     public override async Task OnDisconnectedAsync(Exception exception)
     {
-        
         var userId = Context.UserIdentifier;
-        ConnectedUsers.TryRemove(userId, out _);
+        _sharedMemoryConnectionDB.Connections.TryRemove(userId, out string connectionId);
         
-        _logger.LogInformation("Client disconnected, ConnectionID: {0}", Context.ConnectionId);
+        _logger.LogInformation("Client disconnected, ConnectionID: {0}", connectionId);
         
         await base.OnDisconnectedAsync(exception);
     }
@@ -73,7 +75,7 @@ public class ChatHub: Hub
         
         IResponse response = await _chatService.GetActiveRequests(userId);
         
-        var activeRequests = ((SuccessResponse<List<ReadRequestDTO>>) response).Data;
+        var activeRequests = ((SuccessResponse<List<ReadChatItemDto>>) response).Data;
         
         var firstRequest = activeRequests.FirstOrDefault();
         
