@@ -13,5 +13,8 @@ public class User : IdentityUser
     public string? ProfilePictureType { get; set; }
     public ICollection<ChatRequest> RequestsAsRequester { get; set; }
     public ICollection<ChatRequest> RequestsAsRequested { get; set; }
+    
+    public ICollection<ChatMessage> MessagesAsSender { get; set; }
+    public ICollection<ChatMessage> MessagesAsReceiver { get; set; }
     public User() : base() { }
 }

@@ -30,5 +30,21 @@ public class ChatServiceDbContext : IdentityDbContext<User>
             .HasForeignKey(cr => cr.RequestedId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        modelBuilder.Entity<ChatMessage>()
+            .HasOne<User>(cm => cm.Sender)
+            .WithMany(u => u.MessagesAsSender)
+            .HasForeignKey(cm => cm.SenderId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<ChatMessage>()
+            .HasOne<User>(cm => cm.Receiver)
+            .WithMany(u => u.MessagesAsReceiver)
+            .HasForeignKey(cm => cm.ReceiverId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<ChatMessage>()
+            .HasOne<ChatRequest>(cm => cm.ChatRequest)
+            .WithMany(cr => cr.Messages)
+            .HasForeignKey(cm => cm.ChatRequestId);
     }
 }

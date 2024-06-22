@@ -7,15 +7,19 @@ public class ChatMessage
 {
     [Key]
     public int Id { get; set; }
+    
+    public int ChatRequestId { get; set; }
+    public virtual ChatRequest ChatRequest { get; set; }
+    
     [Required]
-    [MaxLength(100)]
-    public string UserId { get; set; }
+    public string SenderId { get; set; }
+    public virtual User Sender { get; set; }
+    [Required]
+    public string ReceiverId { get; set; }
+    public virtual User Receiver { get; set; }
     [Required]
     [MaxLength(600)]
     public string Message { get; set; }
     [Required]
     public DateTime Timestamp { get; set; }
-    [ForeignKey("ChatGroup")]
-    public int ChatGroupId { get; set; }
-    public ChatGroup ChatGroup { get; set; }
 }
