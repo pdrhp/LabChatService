@@ -61,12 +61,32 @@ public class ChatService : IChatService
             .FirstOrDefault(cr =>
                 cr.RequestedId == user.Id && cr.RequesterId == RequesterId && cr.Accepted == false &&
                 cr.Rejected == false);
-
+        
         ReadChatItemDto safeChatItem = _mapperService.MapRequestToReadRequestDTO(requestFromDb);
 
         await _chatHubContext.Clients.User(user.Id).SendAsync("ReceiveRequest", safeChatItem);
 
         return new SuccessResponse<ReadChatItemDto>(true, 200, "Requisição enviada com sucesso", safeChatItem);
+    }
+
+    public async Task<IResponse> SendMessageToUser(SendMessageToUserDTO messageDto)
+    {
+        ChatMessage chatMessage = new ChatMessage
+        {
+            ReceiverId = messageDto.receiverId,
+            SenderId = messageDto.senderId!,
+            Message = messageDto.message,
+            ChatRequestId = messageDto.requestId,
+            Timestamp = DateTime.Now
+        };
+
+        var ChatMessageEntityEntry = await _context.ChatMessages.AddAsync(chatMessage);
+        
+        await _chatHubContext.Clients.Users(messageDto.receiverId, messageDto.senderId).SendAsync("ReceiveMessage", ChatMessageEntityEntry.Entity);
+
+        await _context.SaveChangesAsync();
+        
+        return new SuccessResponse<ChatMessage>(true, 200, "Mensagem enviada com sucesso", ChatMessageEntityEntry.Entity);
     }
 
 

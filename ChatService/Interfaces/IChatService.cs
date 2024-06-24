@@ -9,4 +9,6 @@ public interface IChatService
     Task<IResponse> ManageRequest(int RequestId,  bool RequestClientResponse);
 
     Task<IResponse> GetActiveRequests(string UserId);
+
+    Task<IResponse> SendMessageToUser(SendMessageToUserDTO messageDto);
 }

@@ -54,19 +54,18 @@ public class ChatHub: Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task SendMessageToSpecificUser(string email, string message)
+    public async Task SendMessageToUser(SendMessageToUserDTO messageDto)
     {
-        _logger.LogInformation("email: {0}", email);
-        var user = await _userManager.FindByEmailAsync(email);
-        var userId = Context.User.FindFirst(c => c.Type == "id").Value;
-        var sender = await _userManager.FindByIdAsync(userId);
-        if (user == null)
-        {
-            await Clients.Caller.SendAsync("ReceiveMessageFromServer", "admin", "User not found");
-            return;
-        }
+        IResponse response = await _chatService.SendMessageToUser(messageDto);
         
-        await Clients.User(user.Id).SendAsync("ReceiveIndividualMessage", sender.Nome, message);
+
+        if (response is SuccessResponse<ChatMessage> successResponse)
+        {
+            ChatMessage message = successResponse.Data;
+            IReadOnlyList<string> usersIds = new List<string> {messageDto.receiverId, messageDto.senderId};
+
+            await Clients.Users(usersIds).SendAsync("MessageReceiveConfirmation", message.Id, true);
+        }
     }
 
     public async Task GetActiveConversations()
@@ -88,9 +87,4 @@ public class ChatHub: Hub
 
         await Clients.All.SendAsync("TesteEspecifico", "admin", "Teste Especifico");
     }
-    
-    
-
- 
-
 }
