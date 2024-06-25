@@ -40,6 +40,8 @@ public class ChatHub: Hub
         await Clients.Caller.SendAsync("ReceiveMessageFromServer", "Admin: " ,$"Connection established successfully! {userId}");
 
         await GetActiveConversations();
+
+        await _chatService.ConnectionAlert(userId, true);
         
         await base.OnConnectedAsync();
     }
@@ -48,9 +50,8 @@ public class ChatHub: Hub
     {
         var userId = Context.UserIdentifier;
         _sharedMemoryConnectionDB.Connections.TryRemove(userId, out string connectionId);
-        
         _logger.LogInformation("Client disconnected, ConnectionID: {0}", connectionId);
-        
+        await _chatService.ConnectionAlert(userId, false);
         await base.OnDisconnectedAsync(exception);
     }
 

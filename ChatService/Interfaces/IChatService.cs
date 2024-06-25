@@ -11,4 +11,5 @@ public interface IChatService
     Task<IResponse> GetActiveRequests(string UserId);
 
     Task<IResponse> SendMessageToUser(SendMessageToUserDTO messageDto);
+    Task<IResponse> ConnectionAlert(string UserId, bool IsConnected);
 }

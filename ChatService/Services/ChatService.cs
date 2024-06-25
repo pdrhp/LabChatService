@@ -17,15 +17,17 @@ public class ChatService : IChatService
     private readonly ChatServiceDbContext _context;
     private readonly UserManager<User> _userManager;
     private readonly IMapperService _mapperService;
+    private readonly ISharedMemoryConnectionDB _sharedMemoryConnectionDB;
 
 
     public ChatService(IHubContext<ChatHub> chatHubContext, ChatServiceDbContext context, UserManager<User> userManager,
-        IMapperService mapperService)
+        IMapperService mapperService, ISharedMemoryConnectionDB sharedMemoryConnectionDb)
     {
         _chatHubContext = chatHubContext;
         _context = context;
         _userManager = userManager;
         _mapperService = mapperService;
+        _sharedMemoryConnectionDB = sharedMemoryConnectionDb;
     }
     
     public async Task<IResponse> SendRequest(SendRequestDTO dto, string RequesterId)
@@ -62,7 +64,10 @@ public class ChatService : IChatService
                 cr.RequestedId == user.Id && cr.RequesterId == RequesterId && cr.Accepted == false &&
                 cr.Rejected == false);
         
-        ReadChatItemDto safeChatItem = _mapperService.MapRequestToReadRequestDTO(requestFromDb);
+        var connectedUsers = _sharedMemoryConnectionDB.Connections;
+
+        
+        ReadChatItemDto safeChatItem = _mapperService.MapRequestToReadRequestDTO(requestFromDb, connectedUsers);
 
         await _chatHubContext.Clients.User(user.Id).SendAsync("ReceiveRequest", safeChatItem);
 
@@ -89,6 +94,19 @@ public class ChatService : IChatService
         return new SuccessResponse<ChatMessage>(true, 200, "Mensagem enviada com sucesso", ChatMessageEntityEntry.Entity);
     }
 
+    public async Task<IResponse> ConnectionAlert(string UserId, bool IsConnected)
+    {
+        var activeConversationsWithThisUser = await _context.ChatRequests
+            .Where(cr => cr.RequesterId == UserId | cr.RequestedId == UserId && cr.Rejected == false)
+            .Select(cr => new { cr.RequesterId, cr.RequestedId })
+            .ToListAsync();
+        
+        var ids = activeConversationsWithThisUser.SelectMany(cr => new List<string> { cr.RequesterId, cr.RequestedId }).Distinct().ToList();
+        ids = ids.Where(id => id != UserId).ToList();
+        await _chatHubContext.Clients.Users(ids).SendAsync("ReceiveConnectionAlert", UserId, IsConnected);
+        return new SuccessResponse<bool>(true, 200, "Alerta de conexão enviado com sucesso", IsConnected);
+    }
+
 
     public async Task<IResponse> ManageRequest(int RequestId, bool RequestClientResponse)
     {
@@ -107,20 +125,14 @@ public class ChatService : IChatService
         request.Timestamp = DateTime.Now;
         
         
+        var connectedUsers = _sharedMemoryConnectionDB.Connections;
         
-        ReadChatItemDto safeChatItem = _mapperService.MapRequestToReadRequestDTO(request);
+        ReadChatItemDto safeChatItem = _mapperService.MapRequestToReadRequestDTO(request, connectedUsers);
         await _context.SaveChangesAsync();
         
         await _chatHubContext.Clients.Users(safeChatItem.RequesterId, safeChatItem.RequestedId)
             .SendAsync("ReceiveRequestResponse", safeChatItem, RequestClientResponse);
         
-        
-        
-       
-        
-        
-
-
         return new SuccessResponse<ChatRequest>(true, 200, "Solicitação gerenciada com sucesso.", request);
     }
 
@@ -132,9 +144,15 @@ public class ChatService : IChatService
             .Include(cr => cr.Messages)
             .Where(cr => cr.RequestedId == UserId | cr.RequesterId == UserId && cr.Rejected == false)
             .ToListAsync();
+        
+        var connectedUsers = _sharedMemoryConnectionDB.Connections;
 
+        
+        
         List<ReadChatItemDto> safeRequests = new List<ReadChatItemDto>();
-        safeRequests = requests.Select(request => _mapperService.MapRequestToReadRequestDTO(request)).ToList();
+        safeRequests = requests.Select(request => _mapperService.MapRequestToReadRequestDTO(request, connectedUsers)).ToList();
         return new SuccessResponse<List<ReadChatItemDto>>(true, 200, "Solicitações ativas encontradas", safeRequests);
     }
+    
+    
 }

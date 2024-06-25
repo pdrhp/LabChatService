@@ -1,4 +1,5 @@
-﻿using ChatService.DTOs;
+﻿using System.Collections.Concurrent;
+using ChatService.DTOs;
 using ChatService.DTOs.ChatDTOs;
 using ChatService.Interfaces;
 using ChatService.Models;
@@ -17,8 +18,12 @@ public class MapperService : IMapperService
         };
     }
 
-    public ReadChatItemDto MapRequestToReadRequestDTO(ChatRequest request)
+    public ReadChatItemDto MapRequestToReadRequestDTO(ChatRequest request, ConcurrentDictionary<string, string> activeConnections)
     {
+        var requesterOnline = activeConnections.ContainsKey(request.RequesterId);
+        var requestedOnline = activeConnections.ContainsKey(request.RequestedId);
+        
+        
         return new ReadChatItemDto
         {
             Id = request.Id,
@@ -30,7 +35,8 @@ public class MapperService : IMapperService
                 Email = request.Requested.Email,
                 Id = request.Requested.Id,
                 Nome = request.Requested.Nome,
-                UserName = request.Requested.UserName
+                UserName = request.Requested.UserName,
+                online = requestedOnline
             },
             RequesterId = request.RequesterId,
             Requester = new ReadUserDTO
@@ -38,7 +44,8 @@ public class MapperService : IMapperService
                 Email = request.Requester.Email,
                 Id = request.Requester.Id,
                 Nome = request.Requester.Nome,
-                UserName = request.Requester.UserName
+                UserName = request.Requester.UserName,
+                online = requesterOnline
             },
             Timestamp = request.Timestamp,
             Messages = request.Messages?.Select(m => new ReadMessageDto
