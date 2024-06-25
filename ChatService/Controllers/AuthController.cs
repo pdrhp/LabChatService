@@ -43,7 +43,7 @@ public class AuthController: ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("signOut")]
+    [HttpPost("signOut")]
     public async Task<IActionResult> SignOutUser()
     {
         var response = await _userService.SignOutUser(HttpContext);
