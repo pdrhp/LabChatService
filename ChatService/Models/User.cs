@@ -9,8 +9,10 @@ public class User : IdentityUser
     [MaxLength(100)]
     public string Nome { get; set; }
     
-    public byte[]? ProfilePicture { get; set; }
-    public string? ProfilePictureType { get; set; }
+    
+    [Url]
+    public string? ProfilePictureUrl { get; set; }
+    
     public ICollection<ChatRequest> RequestsAsRequester { get; set; }
     public ICollection<ChatRequest> RequestsAsRequested { get; set; }
     

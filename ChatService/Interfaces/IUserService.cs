@@ -11,7 +11,7 @@ public interface IUserService
     Task<IResponse> CreateRoles();
     Task<IResponse> VerifySession(HttpContext context);
     Task<IResponse> SignOutUser(HttpContext context);
-    Task<ProfilePictureResult> GetProfilePicture(string userId);
-    Task<ProfilePictureResult> UpdateProfilePicture(string userId, IFormFile file);
+    // Task<ProfilePictureResult> GetProfilePicture(string userId);
+    // Task<ProfilePictureResult> UpdateProfilePicture(string userId, IFormFile file);
     void SetTokensInsideCookie(string token, HttpContext context);
 }

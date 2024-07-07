@@ -86,47 +86,47 @@ public class UserService: IUserService
         return new SuccessResponse(true, 200, "Usuário deslogado com sucesso!");
     }
 
-    public async Task<ProfilePictureResult> GetProfilePicture(string userId)
-    {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user == null || user.ProfilePicture is null)
-            return null;
+    // public async Task<ProfilePictureResult> GetProfilePicture(string userId)
+    // {
+    //     var user = await _userManager.FindByIdAsync(userId);
+    //     if (user == null || user.ProfilePicture is null)
+    //         return null;
+    //
+    //     return new ProfilePictureResult
+    //     {
+    //         ImageData = user.ProfilePicture,
+    //         ImageType = user.ProfilePictureType
+    //     };
+    // }
 
-        return new ProfilePictureResult
-        {
-            ImageData = user.ProfilePicture,
-            ImageType = user.ProfilePictureType
-        };
-    }
-
-    public async Task<ProfilePictureResult> UpdateProfilePicture(string userId, IFormFile file)
-    {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
-        {
-            return null;
-        }
-
-        using var memoryStream = new MemoryStream();
-        await file.CopyToAsync(memoryStream);
-
-        user.ProfilePicture = memoryStream.ToArray();
-        user.ProfilePictureType = file.ContentType;
-
-        var result = await _userManager.UpdateAsync(user);
-
-        if (!result.Succeeded)
-        {
-            return null;
-        }
-        
-        return new ProfilePictureResult
-        {
-            ImageData = user.ProfilePicture,
-            ImageType = user.ProfilePictureType
-        };
-
-    }
+    // public async Task<ProfilePictureResult> UpdateProfilePicture(string userId, IFormFile file)
+    // {
+    //     var user = await _userManager.FindByIdAsync(userId);
+    //     if (user == null)
+    //     {
+    //         return null;
+    //     }
+    //
+    //     using var memoryStream = new MemoryStream();
+    //     await file.CopyToAsync(memoryStream);
+    //
+    //     user.ProfilePicture = memoryStream.ToArray();
+    //     user.ProfilePictureType = file.ContentType;
+    //
+    //     var result = await _userManager.UpdateAsync(user);
+    //
+    //     if (!result.Succeeded)
+    //     {
+    //         return null;
+    //     }
+    //     
+    //     return new ProfilePictureResult
+    //     {
+    //         ImageData = user.ProfilePicture,
+    //         ImageType = user.ProfilePictureType
+    //     };
+    //
+    // }
 
     public async Task<IResponse> GetRole(string id)
     {
