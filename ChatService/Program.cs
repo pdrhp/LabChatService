@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using ChatService.Configuration;
 using ChatService.Data;
+using ChatService.Extensions;
 using ChatService.Hubs;
 using ChatService.Interfaces;
 using ChatService.Mapper;
@@ -14,24 +16,32 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
+var enviroment = builder.Environment;
+
+if (enviroment.IsProduction())
+{
+    builder.Configuration.LoadVaultSecrets(builder.Configuration);
+}
 
 builder.Services.AddDbContext<ChatServiceDbContext>(opts =>
 {
-    opts.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    opts.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]);
 });
+
+builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio"));
 
 builder.Services.AddScoped<IMapperService, MapperService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddSingleton<IS3Service, MinioService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IChatService, ChatService.Services.ChatService>();
 builder.Services.AddSingleton<ISharedMemoryConnectionDB, SharedMemoryConnectionsDB>();
 
-builder.Services.AddSignalR().AddHubOptions<ChatHub>(o =>
-{
-    o.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
-});
+builder.Services.AddSignalR().AddHubOptions<ChatHub>(o => { o.ClientTimeoutInterval = TimeSpan.FromSeconds(60); });
 builder.Services.Replace(ServiceDescriptor.Singleton(typeof(IUserIdProvider), typeof(UserIdProvider)));
 
 builder.Services.AddCors(options =>
@@ -56,7 +66,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     .AddEntityFrameworkStores<ChatServiceDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddControllers().AddJsonOptions(x => 
+builder.Services.AddControllers().AddJsonOptions(x =>
     x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
