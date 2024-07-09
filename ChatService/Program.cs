@@ -16,15 +16,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
-// Testing the pipeline
-
 var builder = WebApplication.CreateBuilder(args);
 
 var enviroment = builder.Environment;
+var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
 
 if (enviroment.IsProduction())
 {
-    builder.Configuration.LoadVaultSecrets(builder.Configuration);
+    builder.Configuration.LoadVaultSecrets(builder.Configuration, logger);
 
     builder.Configuration["CORS:AllowedOrigins"] = "https://labchat.phlab.software";
 }
@@ -138,7 +137,6 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception e)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(e, "An error occurred while migrating the database.");
     }
 }
