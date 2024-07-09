@@ -1,0 +1,36 @@
+﻿version: '3.8'
+
+services:
+  labchat-service:
+    build:
+      context: .
+      dockerfile: ChatService/Dockerfile.dev
+    environment:
+      - Vault_URI="https://seu-vault-uri.com"
+      - Vault_TOKEN="seu-vault-token"
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings:DefaultConnection=Server=sql-server,1433;Database=labchat;User Id=sa;Password=rooTDb123;TrustServerCertificate=yes;
+    ports:
+      - "6061:8081"
+      - "6060:8080"
+    depends_on:
+      sql-server:
+        condition: service_healthy
+
+  sql-server:
+    image: mcr.microsoft.com/azure-sql-edge
+    environment:
+      - ACCEPT_EULA=1
+      - SA_PASSWORD=rooTDb123
+    volumes:
+      - sql-data:/var/opt/mssql
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P rooTDb123 -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  sql-data:

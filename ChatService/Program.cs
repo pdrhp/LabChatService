@@ -34,7 +34,9 @@ builder.Services.AddDbContext<ChatServiceDbContext>(opts =>
     opts.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]);
 });
 
+
 builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio"));
+
 
 builder.Services.AddScoped<IMapperService, MapperService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -114,6 +116,32 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ChatServiceDbContext>();
+        var pendingMigrations = context.Database.GetPendingMigrations().Any();
+        if (!context.Database.GetAppliedMigrations().Any() && !pendingMigrations)
+        {
+            // Crie uma migração inicial se não houver migrações
+            context.Database.ExecuteSqlRaw("CREATE TABLE __EFMigrationsHistory (MigrationId nvarchar(150) NOT NULL, ProductVersion nvarchar(32) NOT NULL);");
+            // Adicione a migração inicial
+            context.Database.Migrate();
+        }
+        if (pendingMigrations)
+        {
+            context.Database.Migrate();
+        }
+    }
+    catch (Exception e)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(e, "An error occurred while migrating the database.");
+    }
+}
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
