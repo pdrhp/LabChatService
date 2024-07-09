@@ -30,6 +30,7 @@ if (enviroment.IsProduction())
 
 builder.Services.AddDbContext<ChatServiceDbContext>(opts =>
 {
+    logger.LogInformation(builder.Configuration["ConnectionStrings:DefaultConnection"]);
     opts.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]);
 });
 
