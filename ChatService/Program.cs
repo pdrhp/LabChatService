@@ -25,6 +25,8 @@ var enviroment = builder.Environment;
 if (enviroment.IsProduction())
 {
     builder.Configuration.LoadVaultSecrets(builder.Configuration);
+
+    builder.Configuration["CORS:AllowedOrigins"] = "https://labchat.phlab.software";
 }
 
 builder.Services.AddDbContext<ChatServiceDbContext>(opts =>
@@ -48,7 +50,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("chat", policyBuilder =>
     {
-        policyBuilder.WithOrigins("http://localhost:5173");
+        policyBuilder.WithOrigins(builder.Configuration["CORS:AllowedOrigins"]);
         policyBuilder.AllowAnyHeader();
         policyBuilder.AllowAnyMethod();
         policyBuilder.AllowCredentials();
@@ -114,11 +116,9 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.UseCors("chat");
 
