@@ -1,4 +1,6 @@
-﻿services:
+﻿version: '3.8'
+
+services:
   labchat-service:
     image: labchat-service:latest
     deploy:
