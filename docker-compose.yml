@@ -1,0 +1,22 @@
+﻿services:
+  labchat-service:
+    image: labchat-service:latest
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    networks:
+      - npm_public
+    environment:
+      - Vault_URI=${VAULT_URI}
+      - Vault_TOKEN=${VAULT_TOKEN}
+    ports:
+      - "6061:8081"
+      - "6060:8080"
+  
+networks:
+  npm_public:
+    external: true
