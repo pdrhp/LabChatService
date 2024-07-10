@@ -32,17 +32,17 @@ public class MinioService : IS3Service
             {
                 await _minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(_minioSettings.BucketName));
             }
+            
+            string filePath = string.IsNullOrEmpty(path) ? objectName : $"{path}/{objectName}.{contentType.Split('/')[1]}";
 
-            string filePath = string.IsNullOrEmpty(path) ? objectName : $"{path}/{objectName}";
-
-            await _minioClient.PutObjectAsync(new PutObjectArgs()
+            var putObjectResponse = await _minioClient.PutObjectAsync(new PutObjectArgs()
                 .WithBucket(_minioSettings.BucketName)
                 .WithObject(filePath)
                 .WithStreamData(data)
-                .WithObjectSize(size)
+                .WithObjectSize(data.Length)
                 .WithContentType(contentType));
-
-            string fileUrl = $"{_minioSettings.Endpoint}/{_minioSettings.BucketName}/{filePath}";
+            
+            string fileUrl = $"{_minioSettings.Endpoint}/{_minioSettings.BucketName}/{putObjectResponse.ObjectName}";
 
             return fileUrl;
         }
@@ -52,4 +52,17 @@ public class MinioService : IS3Service
             throw;
         }
     }
+
+    public async Task<string> GetImageURL(string path, string objectName)
+    {
+        string filePath = string.IsNullOrEmpty(path) ? objectName : $"{path}/{objectName}";
+        
+        string url = await _minioClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
+            .WithBucket(_minioSettings.BucketName)
+            .WithObject(filePath)
+            .WithExpiry(60 * 60 * 24));
+        
+        return url;
+    }
+    
 }

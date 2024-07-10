@@ -1,4 +1,7 @@
-﻿using ChatService.Interfaces;
+﻿using ChatService.DTOs;
+using ChatService.Helper;
+using ChatService.Interfaces;
+using Microsoft.AspNet.SignalR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatService.Controllers;
@@ -14,17 +17,43 @@ public class UserController : ControllerBase
         _userService = userService;
     }
     
-    // [HttpGet("{userId}/profilePicture")]
-    // public async Task<IActionResult> GetProfilePicture(string userId)
-    // {
-    //     var result = await _userService.GetProfilePicture(userId);
-    //     return File(result.ImageData, result.ImageType);
-    // }
+    [Authorize(Roles = "Admin")]
+    [HttpPost]
+    public async Task<IActionResult> SignUpUser([FromBody] SignUpUserDTO dto)
+    {
+        var response = await _userService.SignUpUser(dto);
+
+        if (response.Flag == false)
+        {
+            ResponseHelper.HandleError(this, response);
+        }
+        
+        return Created("Sucesso", response);
+    }
     
-    // [HttpPost("{userId}/updateProfilePicture")]
-    // public async Task<IActionResult> UpdateProfilePicture(string userId, [FromForm] IFormFile file)
-    // {
-    //     var result = await _userService.UpdateProfilePicture(userId, file);
-    //     return File(result.ImageData, result.ImageType);
-    // }
+    [HttpGet("{userId}/profilePicture")]
+    public async Task<IActionResult> GetProfilePicture(string userId)
+    {
+        var result = await _userService.GetProfilePicture(userId);
+        
+        if (result.Flag == false)
+        {
+            ResponseHelper.HandleError(this, result);
+        }
+        
+        return Ok(result);
+    }
+    
+    [HttpPost("{userId}/updateProfilePicture")]
+    public async Task<IActionResult> UpdateProfilePicture(string userId, [FromForm] IFormFile file)
+    {
+        var result = await _userService.UpdateProfilePicture(userId, file);
+        
+        if (result.Flag == false)
+        {
+            ResponseHelper.HandleError(this, result);
+        }
+
+        return Ok(result);
+    }
 }

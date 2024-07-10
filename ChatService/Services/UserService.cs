@@ -14,6 +14,7 @@ public class UserService: IUserService
     private RoleManager<IdentityRole> _roleManager;
     private IMapperService _mapper;
     private ITokenService _tokenService;
+    private readonly IS3Service _s3Service;
     
     
     public UserService(
@@ -21,15 +22,40 @@ public class UserService: IUserService
         UserManager<User> userManager,
         IMapperService mapper,
         ITokenService tokenService,
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole> roleManager,
+        IS3Service s3Service)
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _roleManager = roleManager;
         _mapper = mapper;
         _tokenService = tokenService;
+        _s3Service = s3Service;
     }
 
+    public async Task<IResponse> SignUpUser(SignUpUserDTO userDto)
+    {
+        if (userDto is null)
+            return new ErrorResponse(false, 400, "Usuário não pode ser nulo");
+
+        User newUser = _mapper.MapUserDtoToUser(userDto);
+
+        if (userDto.Password != userDto.ConfirmPassword)
+            return new ErrorResponse(false, 400, "As senhas não coincidem");
+
+        IdentityResult result = await _userManager.CreateAsync(newUser, userDto.Password);
+
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(e => e.Description);
+            return new ErrorResponse(false, 400, $"Falha ao cadastrar usuário! Erros: {string.Join(", ", errors)}");
+        }
+        
+        await _userManager.AddToRoleAsync(newUser, "User");
+
+        return new SuccessResponse<User>(true, 201, "Usuário cadastrado com sucesso!", newUser);
+    }
+    
     public async Task<IResponse> CreateUser(CreateUserDTO userDto)
     {
         if (userDto is null)
@@ -47,16 +73,15 @@ public class UserService: IUserService
             var errors = result.Errors.Select(e => e.Description);
             return new ErrorResponse(false, 400, $"Falha ao cadastrar usuário! Erros: {string.Join(", ", errors)}");
         }
-
-        await _userManager.AddToRolesAsync(newUser, userDto.Roles.ToList());
+        
+        await _userManager.AddToRolesAsync(newUser, userDto.Roles);
 
         return new SuccessResponse<User>(true, 201, "Usuário cadastrado com sucesso!", newUser);
     }
-    
 
     public async Task<IResponse> LogInUser(LoginUserDto userDto, HttpContext context)
     {
-        var appUser = await _userManager.FindByEmailAsync(userDto.Email);
+        var appUser = await _userManager.FindByNameAsync(userDto.Username);
         
         if (appUser is null)
             return new ErrorResponse(false, 400, "Usuário não encontrado");
@@ -68,7 +93,7 @@ public class UserService: IUserService
 
         var userRoles = await _userManager.GetRolesAsync(appUser);
         
-        CreateUserSessionDTO userSession = new CreateUserSessionDTO(appUser.Id, appUser.UserName, appUser.Nome, appUser.Email, userRoles.ToList());
+        CreateUserSessionDTO userSession = new CreateUserSessionDTO(appUser.Id, appUser.UserName, appUser.Nome, userRoles.ToList());
 
         ReadUserSessionDTO loggedUser = _tokenService.GenerateToken(userSession);
         
@@ -86,47 +111,45 @@ public class UserService: IUserService
         return new SuccessResponse(true, 200, "Usuário deslogado com sucesso!");
     }
 
-    // public async Task<ProfilePictureResult> GetProfilePicture(string userId)
-    // {
-    //     var user = await _userManager.FindByIdAsync(userId);
-    //     if (user == null || user.ProfilePicture is null)
-    //         return null;
-    //
-    //     return new ProfilePictureResult
-    //     {
-    //         ImageData = user.ProfilePicture,
-    //         ImageType = user.ProfilePictureType
-    //     };
-    // }
+    public async Task<IResponse> GetProfilePicture(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        
+        if (user is null)
+            return new ErrorResponse(false, 404, "Usuário não encontrado");
+        
+        if(user.ProfilePictureUrl is null)
+            return new ErrorResponse(false, 404, "Imagem de perfil não encontrada");
+        
+        return new SuccessResponse<string>(true, 200, "Imagem de perfil encontrada!", user.ProfilePictureUrl);
+    }
 
-    // public async Task<ProfilePictureResult> UpdateProfilePicture(string userId, IFormFile file)
-    // {
-    //     var user = await _userManager.FindByIdAsync(userId);
-    //     if (user == null)
-    //     {
-    //         return null;
-    //     }
-    //
-    //     using var memoryStream = new MemoryStream();
-    //     await file.CopyToAsync(memoryStream);
-    //
-    //     user.ProfilePicture = memoryStream.ToArray();
-    //     user.ProfilePictureType = file.ContentType;
-    //
-    //     var result = await _userManager.UpdateAsync(user);
-    //
-    //     if (!result.Succeeded)
-    //     {
-    //         return null;
-    //     }
-    //     
-    //     return new ProfilePictureResult
-    //     {
-    //         ImageData = user.ProfilePicture,
-    //         ImageType = user.ProfilePictureType
-    //     };
-    //
-    // }
+    public async Task<IResponse> UpdateProfilePicture(string userId, IFormFile file)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return new ErrorResponse(false, 404, "Usuário não encontrado!");
+        }
+    
+        Stream stream = file.OpenReadStream();
+        
+
+        string imageUrl = await _s3Service.UploadFileAsync("public", $"{user.UserName}_picture", stream,
+            stream.Length, file.ContentType);
+
+        user.ProfilePictureUrl = "https://" + imageUrl;
+            
+        var result = await _userManager.UpdateAsync(user);
+    
+        if (!result.Succeeded)
+        {
+            return new ErrorResponse(false, 400, "Erro ao atualizar imagem de perfil!");
+        }
+
+
+        return new SuccessResponse<string>(true, 200, "Imagem de perfil atualizada com sucesso!", imageUrl);
+    }
 
     public async Task<IResponse> GetRole(string id)
     {

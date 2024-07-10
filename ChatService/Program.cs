@@ -18,8 +18,6 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Testing the pipeline
-
 var enviroment = builder.Environment;
 var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
 
