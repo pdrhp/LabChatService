@@ -5,7 +5,7 @@ namespace ChatService.DTOs;
 public record LoginUserDto
 {
     [Required]
-    public string Email { get; init; }
+    public string Username { get; init; }
     
     [Required]
     public string Password { get; init; }

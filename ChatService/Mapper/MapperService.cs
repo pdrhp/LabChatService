@@ -13,8 +13,7 @@ public class MapperService : IMapperService
         return new User
         {
             UserName = userDto.Username,
-            Nome = userDto.Nome,
-            Email = userDto.Email
+            Nome = userDto.Nome
         };
     }
     
@@ -24,7 +23,6 @@ public class MapperService : IMapperService
         {
             UserName = userDto.Username,
             Nome = userDto.Nome,
-            Email = userDto.Email
         };
     }
 

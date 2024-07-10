@@ -38,7 +38,6 @@ public class TokenService : ITokenService
             new Claim("id", userSession.Id),
             new Claim("username", userSession.username),
             new Claim("nome", userSession.nome),
-            new Claim(ClaimTypes.Email, userSession.email),
             new Claim("loginTimeStamp", DateTime.UtcNow.ToString())
         });
 
@@ -60,7 +59,7 @@ public class TokenService : ITokenService
 
         string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-        return new ReadUserSessionDTO(userSession.Id, userSession.username,userSession.nome,userSession.email, DateTime.UtcNow.ToString(),
+        return new ReadUserSessionDTO(userSession.Id, userSession.username,userSession.nome, DateTime.UtcNow.ToString(),
             userSession.Role, tokenString);
     }
 
@@ -90,11 +89,10 @@ public class TokenService : ITokenService
         var id = principal.FindFirst("id").Value;
         var username = principal.FindFirst("username").Value;
         var nome = principal.FindFirst("nome").Value;
-        var email = principal.FindFirst(ClaimTypes.Email).Value;
         var loginTimeStamp = principal.FindFirst("loginTimeStamp").Value;
         var roles = principal.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
         
         
-        return new ReadUserSessionDTO(id, username, nome, email, loginTimeStamp, roles, token);
+        return new ReadUserSessionDTO(id, username, nome, loginTimeStamp, roles, token);
     }
 }
