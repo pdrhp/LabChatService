@@ -1,5 +1,6 @@
 ﻿namespace ChatService.DTOs;
-public record CreateUserDTO
+
+public record SignUpUserDTO
 {
     public string Nome { get; init; }
     
@@ -10,6 +11,5 @@ public record CreateUserDTO
     public string Password { get; init; }
     
     public string ConfirmPassword { get; init; }
-    
-    public ICollection<string> Roles { get; init; }
 }
+

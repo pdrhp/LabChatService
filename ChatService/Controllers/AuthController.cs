@@ -18,9 +18,9 @@ public class AuthController: ControllerBase
     }
 
     [HttpPost("signUp")]
-    public async Task<IActionResult> SignUpUser([FromBody] CreateUserDTO dto)
+    public async Task<IActionResult> SignUpUser([FromBody] SignUpUserDTO dto)
     {
-        var response = await _userService.CreateUser(dto);
+        var response = await _userService.SignUpUser(dto);
 
         if (response.Flag == false)
         {
@@ -83,6 +83,7 @@ public class AuthController: ControllerBase
         return Ok(response);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("createRoles")]
     public async Task<IActionResult> CreateRoles()
     {

@@ -30,6 +30,29 @@ public class UserService: IUserService
         _tokenService = tokenService;
     }
 
+    public async Task<IResponse> SignUpUser(SignUpUserDTO userDto)
+    {
+        if (userDto is null)
+            return new ErrorResponse(false, 400, "Usuário não pode ser nulo");
+
+        User newUser = _mapper.MapUserDtoToUser(userDto);
+
+        if (userDto.Password != userDto.ConfirmPassword)
+            return new ErrorResponse(false, 400, "As senhas não coincidem");
+
+        IdentityResult result = await _userManager.CreateAsync(newUser, userDto.Password);
+
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(e => e.Description);
+            return new ErrorResponse(false, 400, $"Falha ao cadastrar usuário! Erros: {string.Join(", ", errors)}");
+        }
+        
+        await _userManager.AddToRoleAsync(newUser, "User");
+
+        return new SuccessResponse<User>(true, 201, "Usuário cadastrado com sucesso!", newUser);
+    }
+    
     public async Task<IResponse> CreateUser(CreateUserDTO userDto)
     {
         if (userDto is null)
@@ -47,12 +70,11 @@ public class UserService: IUserService
             var errors = result.Errors.Select(e => e.Description);
             return new ErrorResponse(false, 400, $"Falha ao cadastrar usuário! Erros: {string.Join(", ", errors)}");
         }
-
-        await _userManager.AddToRolesAsync(newUser, userDto.Roles.ToList());
+        
+        await _userManager.AddToRolesAsync(newUser, userDto.Roles);
 
         return new SuccessResponse<User>(true, 201, "Usuário cadastrado com sucesso!", newUser);
     }
-    
 
     public async Task<IResponse> LogInUser(LoginUserDto userDto, HttpContext context)
     {

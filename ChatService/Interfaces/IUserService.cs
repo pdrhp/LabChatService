@@ -4,7 +4,7 @@ namespace ChatService.Interfaces;
 
 public interface IUserService
 {
-    Task<IResponse> CreateUser(CreateUserDTO user);
+    Task<IResponse> SignUpUser(SignUpUserDTO user);
     Task<IResponse> LogInUser(LoginUserDto user, HttpContext context);
     Task<IResponse> GetRole(string id);
     IResponse ValidateToken(string token);

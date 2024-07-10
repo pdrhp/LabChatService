@@ -8,6 +8,16 @@ namespace ChatService.Mapper;
 
 public class MapperService : IMapperService
 {
+    public User MapUserDtoToUser(SignUpUserDTO userDto)
+    {
+        return new User
+        {
+            UserName = userDto.Username,
+            Nome = userDto.Nome,
+            Email = userDto.Email
+        };
+    }
+    
     public User MapUserDtoToUser(CreateUserDTO userDto)
     {
         return new User
