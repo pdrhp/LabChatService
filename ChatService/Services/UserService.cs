@@ -53,7 +53,9 @@ public class UserService: IUserService
         
         await _userManager.AddToRoleAsync(newUser, "User");
 
-        return new SuccessResponse<User>(true, 201, "Usuário cadastrado com sucesso!", newUser);
+        ReadUserDTO mappedUser = _mapper.MapUserToReadUserDTO(newUser);
+
+        return new SuccessResponse<ReadUserDTO>(true, 201, "Usuário cadastrado com sucesso!", mappedUser);
     }
     
     public async Task<IResponse> CreateUser(CreateUserDTO userDto)
