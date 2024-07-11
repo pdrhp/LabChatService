@@ -16,6 +16,20 @@ public class UserController : ControllerBase
     {
         _userService = userService;
     }
+
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetUsers()
+    {
+        var response = await _userService.GetAllUsers();
+        
+        if (response.Flag == false)
+        {
+            return ResponseHelper.HandleError(this, response);
+        }
+        
+        return Ok(response);
+    }
     
     [Authorize(Roles = "Admin")]
     [HttpPost]
@@ -56,4 +70,6 @@ public class UserController : ControllerBase
 
         return Ok(result);
     }
+    
+    
 }

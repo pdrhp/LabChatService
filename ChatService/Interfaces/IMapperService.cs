@@ -11,4 +11,6 @@ public interface IMapperService
     User MapUserDtoToUser(CreateUserDTO userDto);
     ReadChatItemDto MapRequestToReadRequestDTO(ChatRequest request,
         ConcurrentDictionary<string, string> activeConnections);
+
+    ReadUserDTO MapUserToReadUserDTO(User userDto);
 }

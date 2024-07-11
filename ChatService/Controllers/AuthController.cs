@@ -24,7 +24,7 @@ public class AuthController: ControllerBase
 
         if (response.Flag == false)
         {
-            ResponseHelper.HandleError(this, response);
+            return ResponseHelper.HandleError(this, response);
         }
         
         return Created("Sucesso", response);
@@ -37,7 +37,7 @@ public class AuthController: ControllerBase
         
         if (response.Flag == false)
         {
-            ResponseHelper.HandleError(this, response);
+            return ResponseHelper.HandleError(this, response);
         }
         
         return Ok(response);
@@ -50,7 +50,7 @@ public class AuthController: ControllerBase
         
         if (response.Flag == false)
         {
-            ResponseHelper.HandleError(this, response);
+            return ResponseHelper.HandleError(this, response);
         }
         
         return Ok(response);
@@ -64,7 +64,7 @@ public class AuthController: ControllerBase
         
         if (response.Flag == false)
         {
-            ResponseHelper.HandleError(this, response);
+            return ResponseHelper.HandleError(this, response);
         }
         
         return Ok(response);
@@ -77,7 +77,7 @@ public class AuthController: ControllerBase
         
         if (response.Flag == false)
         {
-            ResponseHelper.HandleError(this, response);
+           return  ResponseHelper.HandleError(this, response);
         }
         
         return Ok(response);

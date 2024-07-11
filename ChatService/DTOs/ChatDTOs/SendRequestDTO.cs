@@ -5,6 +5,5 @@ namespace ChatService.DTOs.ChatDTOs;
 public class SendRequestDTO
 {
     [Required]
-    [EmailAddress]
-    public string Email { get; set; }
+    public string Username { get; set; }
 }

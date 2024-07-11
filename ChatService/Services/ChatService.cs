@@ -32,7 +32,7 @@ public class ChatService : IChatService
     
     public async Task<IResponse> SendRequest(SendRequestDTO dto, string RequesterId)
     {
-        var user = await _userManager.FindByEmailAsync(dto.Email);
+        var user = await _userManager.FindByNameAsync(dto.Username);
         if (user == null)
         {
             return new ErrorResponse(false, 404, "Usuário não encontrado");

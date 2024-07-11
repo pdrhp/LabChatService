@@ -40,7 +40,6 @@ public class MapperService : IMapperService
             RequestedId = request.RequestedId,
             Requested = new ReadUserDTO
             {
-                Email = request.Requested.Email,
                 Id = request.Requested.Id,
                 Nome = request.Requested.Nome,
                 UserName = request.Requested.UserName,
@@ -49,7 +48,6 @@ public class MapperService : IMapperService
             RequesterId = request.RequesterId,
             Requester = new ReadUserDTO
             {
-                Email = request.Requester.Email,
                 Id = request.Requester.Id,
                 Nome = request.Requester.Nome,
                 UserName = request.Requester.UserName,
@@ -64,6 +62,17 @@ public class MapperService : IMapperService
                 ReceiverId = m.ReceiverId,
                 Timestamp = m.Timestamp
             }).ToList()
+        };
+    }
+    
+    public ReadUserDTO MapUserToReadUserDTO(User user)
+    {
+        return new ReadUserDTO
+        {
+            Nome = user.Nome,
+            UserName = user.UserName,
+            online = false,
+            Id = user.Id
         };
     }
 }
