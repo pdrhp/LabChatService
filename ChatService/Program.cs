@@ -18,7 +18,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
 
-// Version 0.1.0
 
 var builder = WebApplication.CreateBuilder(args);
 
