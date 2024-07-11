@@ -153,6 +153,18 @@ public class UserService: IUserService
         return new SuccessResponse<string>(true, 200, "Imagem de perfil atualizada com sucesso!", imageUrl);
     }
 
+    public async Task<IResponse> GetAllUsers()
+    {
+        ICollection<User> users = await _userManager.Users.ToListAsync();
+        
+        if (users.Count == 0)
+            return new ErrorResponse(false, 404, "Nenhum usuário encontrado!");
+
+        IEnumerable<ReadUserDTO> mappedUsers = users.Select(u => _mapper.MapUserToReadUserDTO(u));
+        
+        return new SuccessResponse<IEnumerable<ReadUserDTO>>(true, 200, "Usuários encontrados!", mappedUsers);
+    }
+    
     public async Task<IResponse> GetRole(string id)
     {
         throw new NotImplementedException();

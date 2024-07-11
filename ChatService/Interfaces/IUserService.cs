@@ -9,6 +9,7 @@ public interface IUserService
     Task<IResponse> GetRole(string id);
     IResponse ValidateToken(string token);
     Task<IResponse> CreateRoles();
+    Task<IResponse> GetAllUsers();
     Task<IResponse> VerifySession(HttpContext context);
     Task<IResponse> SignOutUser(HttpContext context);
     Task<IResponse> GetProfilePicture(string userId);
