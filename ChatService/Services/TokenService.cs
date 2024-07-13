@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using ChatService.DTOs;
+using ChatService.Extensions;
 using ChatService.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 
@@ -52,7 +53,7 @@ public class TokenService : ITokenService
 
         var token = new JwtSecurityToken
         (
-            expires: DateTime.Now.AddHours(5),
+            expires: DateTime.Now.NowInBrasilia().AddHours(5),
             claims: identity.Claims,
             signingCredentials: signInCrendentials
         );
