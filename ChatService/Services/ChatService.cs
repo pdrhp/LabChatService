@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using ChatService.Data;
 using ChatService.DTOs.ChatDTOs;
+using ChatService.Extensions;
 using ChatService.Hubs;
 using ChatService.Interfaces;
 using ChatService.Models;
@@ -51,7 +52,7 @@ public class ChatService : IChatService
         {
             RequesterId = RequesterId,
             RequestedId = user.Id,
-            Timestamp = DateTime.Now,
+            Timestamp = DateTime.Now.NowInBrasilia(),
             Accepted = false,
             Rejected = false
         };
@@ -82,7 +83,7 @@ public class ChatService : IChatService
             SenderId = messageDto.senderId!,
             Message = messageDto.message,
             ChatRequestId = messageDto.requestId,
-            Timestamp = DateTime.Now
+            Timestamp = DateTime.Now.NowInBrasilia()
         };
 
         var ChatMessageEntityEntry = await _context.ChatMessages.AddAsync(chatMessage);
@@ -122,7 +123,7 @@ public class ChatService : IChatService
 
         request.Accepted = RequestClientResponse;
         request.Rejected = !RequestClientResponse;
-        request.Timestamp = DateTime.Now;
+        request.Timestamp = DateTime.Now.NowInBrasilia();
         
         
         var connectedUsers = _sharedMemoryConnectionDB.Connections;
