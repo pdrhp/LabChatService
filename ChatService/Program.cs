@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ChatService;
 using ChatService.Configuration;
 using ChatService.Data;
 using ChatService.Extensions;
@@ -10,6 +11,7 @@ using ChatService.Mapper;
 using ChatService.Models;
 using ChatService.Providers;
 using ChatService.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
@@ -18,8 +20,11 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
 
-
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    ContentRootPath = Directory.GetCurrentDirectory()
+});
 
 var enviroment = builder.Environment;
 var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
@@ -31,11 +36,13 @@ if (enviroment.IsProduction())
     builder.Configuration["CORS:AllowedOrigins"] = "https://labchat.phlab.software";
 }
 
+
+
 builder.Services.AddDbContext<ChatServiceDbContext>(opts =>
 {
     logger.LogInformation(builder.Configuration["ConnectionStrings:DefaultConnection"]);
     opts.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]);
-});
+}, ServiceLifetime.Singleton);
 
 
 builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio"));
@@ -58,7 +65,7 @@ builder.Services.AddCors(options =>
         policyBuilder.WithOrigins(builder.Configuration["CORS:AllowedOrigins"]);
         policyBuilder.AllowAnyHeader();
         policyBuilder.AllowAnyMethod();
-        policyBuilder.AllowCredentials();
+        policyBuilder.AllowCredentials();    
     });
 });
 
@@ -84,6 +91,8 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -134,9 +143,7 @@ using (var scope = app.Services.CreateScope())
         var pendingMigrations = context.Database.GetPendingMigrations().Any();
         if (!context.Database.GetAppliedMigrations().Any() && !pendingMigrations)
         {
-            // Crie uma migração inicial se não houver migrações
             context.Database.ExecuteSqlRaw("CREATE TABLE __EFMigrationsHistory (MigrationId nvarchar(150) NOT NULL, ProductVersion nvarchar(32) NOT NULL);");
-            // Adicione a migração inicial
             context.Database.Migrate();
         }
         if (pendingMigrations)
@@ -146,7 +153,7 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception e)
     {
-        logger.LogError(e, "An error occurred while migrating the database.");
+        logger.LogError(e, "ERROR WHILE MIGRATING DATABASE");
     }
 }
 
@@ -168,3 +175,5 @@ app.MapControllers();
 app.MapHub<ChatHub>("/connectchat");
 
 app.Run();
+
+public partial class Program;
