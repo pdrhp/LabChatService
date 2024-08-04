@@ -10,6 +10,7 @@ public interface IUserService
     IResponse ValidateToken(string token);
     Task<IResponse> CreateRoles();
     Task<IResponse> GetAllUsers();
+    Task<IResponse> CreateUser(CreateUserDTO userDto);
     Task<IResponse> VerifySession(HttpContext context);
     Task<IResponse> SignOutUser(HttpContext context);
     Task<IResponse> GetProfilePicture(string userId);
